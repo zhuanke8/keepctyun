@@ -14,9 +14,9 @@ function logger(...args) {
 
 async function loginSubmit(page) {
   logger('尝试检查是否进入主界面');
-  await page.waitForSelector('div.desktop-main-entry', { visible: true });
+  await page.waitForSelector('div.desktopcom-enter', { visible: true });
   logger('厉害了铁子, 进入了主界面');
-  await page.click('div.desktop-main-entry');
+  await page.click('div.desktopcom-enter');
   logger('点击了 "进入" 按钮');
 }
 
@@ -59,9 +59,9 @@ async function handleApiResponse(page, response) {
       await page.waitForSelector('div.self-qr', { visible: true });
       const qrUrl = await page.$eval('div.self-qr', el => el.getAttribute('title'));
       let code = await QRCode.toString(qrUrl, { type: 'terminal', errorCorrectionLevel: 'L' });
-      console.log(`请扫码\n${code}\n或打开以下链接:\n https://www.olzz.com/qr/?text=${encodeURIComponent(qrUrl)}`);
+      console.log(`请扫码\n${code}\n或打开以下链接:\n https://www.olzz.com/qr/index.php?text=${encodeURIComponent(qrUrl)}&size=300`);
       waitForQrExpireVisible(page);
-    } else if (url === 'https://desk.ctyun.cn:8810/api/desktop/client/list') {
+    } else if (url === 'https://desk.ctyun.cn:8810/api/desktop/client/pageDesktop') {
       await loginSubmit(page);
     } else if (url === 'https://desk.ctyun.cn:8810/api/desktop/client/connect') {
       const resp = await response.json();
