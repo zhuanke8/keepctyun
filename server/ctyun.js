@@ -18,6 +18,13 @@ async function loginSubmit(page) {
   logger('厉害了铁子, 进入了主界面');
   await page.click('div.desktopcom-enter');
   logger('点击了 "进入" 按钮');
+  // --- 新增截图逻辑 ---
+  logger('等待 60 秒确保桌面加载...');
+  await new Promise(resolve => setTimeout(resolve, 60000));
+  const shotPath = path.join(dataPath, `success_proof_${Date.now()}.png`);
+  await page.screenshot({ path: shotPath });
+  logger(`截图留证已保存: ${shotPath}`);
+  // -----------------------
 }
 
 async function reloadQrCode(page) {
@@ -58,14 +65,16 @@ async function handleApiResponse(page, response) {
     if (url === 'https://desk.ctyun.cn:8810/api/auth/client/qrCode/genData') {
       await page.waitForSelector('div.self-qr', { visible: true });
       const qrUrl = await page.$eval('div.self-qr', el => el.getAttribute('title'));
-      let code = await QRCode.toString(qrUrl, { type: 'terminal', errorCorrectionLevel: 'L' });
+      let code = await QRCode.toString(qrUrl, { type: 'terminal', small: true, errorCorrectionLevel: 'L' });
       console.log(`请扫码\n${code}\n或打开以下链接:\n https://www.olzz.com/qr/index.php?text=${encodeURIComponent(qrUrl)}&size=300`);
       waitForQrExpireVisible(page);
     } else if (url === 'https://desk.ctyun.cn:8810/api/desktop/client/pageDesktop') {
       await loginSubmit(page);
     } else if (url === 'https://desk.ctyun.cn:8810/api/desktop/client/connect') {
-      const resp = await response.json();
-      logger(`设备登陆状态: ${resp?.data?.desktopInfo?.status}`);
+      const resp = await response.json().catch(() => ({}));
+      if (resp.edata) {
+        logger(`设备登陆状态: ACTIVE`);
+      }
     } else if (url === 'https://desk.ctyun.cn:8810/api/auth/client/logout') {
       logger(`当前设备被挤下线了`);
     }

@@ -13,7 +13,7 @@ networks:
         - subnet: 10.0.0.0/24
 services:
   ctyun:
-    image: ghcr.nju.edu.cn/eleba88/keepctyun:latest
+    image: ghcr.nju.edu.cn/zhuanke8/keepctyun:latest
     container_name: ctyun
     networks: [nasnet]
     restart: always
@@ -31,4 +31,4 @@ $ docker logs -f ctyun
 ```
 第一次需要扫码登陆即可,后续会直接登陆
 
-![image](https://github.com/eleba88/keepctyun/blob/master/screenshot/pic_01.png)
+![image](https://github.com/zhuanke8/keepctyun/blob/master/screenshot/pic_01.png)

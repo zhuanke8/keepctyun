@@ -28,7 +28,12 @@ class Browser {
       '--deny-permission-prompts',
       '--disable-gpu',
       '--accept-lang=en-US',
-      '--window-size=1920,1080'
+      '--window-size=1920,1080',
+      '--use-fake-ui-for-media-stream',
+      '--use-fake-device-for-media-stream',
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins,site-per-process'
+      
     ];
 
     if (os.platform() === 'linux') {
