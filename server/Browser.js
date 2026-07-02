@@ -58,6 +58,8 @@ class Browser {
     }
 
     this.browser = await puppeteer.launch(launchOptions);
+    const pages = await this.browser.pages();
+    await Promise.all(pages.map(page => page.close().catch(() => {})));
     this.page = await this.browser.newPage();
 
     // 设置 User-Agent

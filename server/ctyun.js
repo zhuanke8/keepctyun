@@ -2,6 +2,7 @@ const Browser = require('./Browser');
 const path = require('path');
 const QRCode = require('qrcode');
 const dataPath = path.join(__dirname, 'data');
+let qrExpireTimer = null;
 
 function getTimestamp() {
   const now = new Date();
@@ -12,7 +13,15 @@ function logger(...args) {
   console.log(`[${getTimestamp()}]`, ...args);
 }
 
+function clearQrExpireTimer() {
+  if (qrExpireTimer) {
+    clearTimeout(qrExpireTimer);
+    qrExpireTimer = null;
+  }
+}
+
 async function loginSubmit(page) {
+  clearQrExpireTimer();
   logger('尝试检查是否进入主界面');
   await page.waitForSelector('div.desktopcom-enter', { visible: true });
   logger('厉害了铁子, 进入了主界面');
@@ -52,9 +61,17 @@ async function reloadQrCode(page) {
 }
 
 async function waitForQrExpireVisible(page) {
-  await new Promise(resolve => setTimeout(resolve, 10 * 1000 + 5 * 60 * 1000));
-  logger(`二维码超时,重新加载`);
-  await reloadQrCode(page);
+  clearQrExpireTimer();
+  qrExpireTimer = setTimeout(async () => {
+    try {
+      logger(`二维码超时,重新加载`);
+      await reloadQrCode(page);
+    } catch (error) {
+      console.log('reloadQrCode error', error);
+    } finally {
+      qrExpireTimer = null;
+    }
+  }, 10 * 1000 + 5 * 60 * 1000);
 }
 
 async function handleApiResponse(page, response) { 
@@ -73,10 +90,12 @@ async function handleApiResponse(page, response) {
     } else if (url === 'https://desk.ctyun.cn:8810/api/desktop/client/connect') {
       const resp = await response.json().catch(() => ({}));
       if (resp.edata) {
+        clearQrExpireTimer();
         logger(`设备登陆状态: ACTIVE`);
       }
     } else if (url === 'https://desk.ctyun.cn:8810/api/auth/client/logout') {
-      logger(`当前设备被挤下线了`);
+      const resp = await response.json().catch(() => ({}));
+      logger(`页面调用了退出登录接口`, resp);
     }
   } catch (error) {
     console.log('onResponse error', error);
