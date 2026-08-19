@@ -4,7 +4,7 @@ WORKDIR /usr/src/server
 COPY ./server .
 RUN npm install
 
-FROM ghcr.io/puppeteer/puppeteer:latest
+FROM ghcr.io/puppeteer/puppeteer:24.7.0
 WORKDIR /usr/src/
 COPY --from=build --chown=pptruser:pptruser /usr/src/server /usr/src/server
 COPY ./start.sh /usr/src/start.sh
